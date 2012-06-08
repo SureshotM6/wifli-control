@@ -244,46 +244,10 @@ if __name__=="__main__":
             pygame.time.set_timer(pygame.USEREVENT, 2000)
 
 
-##            axis_x = joystick.get_axis(0)
-##            axis_y = joystick.get_axis(1)
-##
-##            axis_trigger = joystick.get_axis(2)
-##
-##            rstick_x = joystick.get_axis(4)
-##            rstick_y = joystick.get_axis(3)
-##
-##            b_a = joystick.get_button(0)
-##            b_b = joystick.get_button(1)
-##            b_x = joystick.get_button(2)
-##            b_y = joystick.get_button(3)
-##            b_lt = joystick.get_button(4)
-##            b_rt = joystick.get_button(5)
-##
-##            if (b_a):
-##                controller.stop_engine()
-##            if (b_b):
-##                controller.stop()
-##                break
-##            if (b_lt):
-##                controller.trim += 1
-##            if (b_rt):
-##                controller.trim -= 1
-
-            #use triggers as rudder pedals
-            #controller.yaw = controller.deadzone(axis_trigger)
             #katamari mode: yaw is difference in sticks
-            #controller.yaw = controller.deadzone((axis_y-rstick_y)/2)
             controller.yaw = controller.deadzone(axis_y-rstick_y)
 
-            #controller.pitch = controller.deadzone(rstick_y)
-            #controller.pitch = controller.deadzone((axis_y+rstick_y)/2)
             controller.pitch = controller.deadzone(axis_y+rstick_y)
-
-            #controller.throttle -= controller.deadzone(axis_y)/15
-            #1.5s to full throttle
-
-##            throttle_adj = controller.deadzone(axis_trigger)
-##            controller.throttle -= (throttle_adj*Clock.get_rawtime())/1500
 
             controller.update()
 
