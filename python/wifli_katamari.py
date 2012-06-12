@@ -119,7 +119,7 @@ class Controller(object):
 
         print "throttle: %.02f" % self.throttle, "pitch: %.02f" % self.pitch, "yaw: %.02f" % self.yaw, "trim: %d" % self.trim
 
-        throttle = int(round(self.throttle*0xff))
+        throttle = int(round(self.throttle*0x80))
         if (throttle < 0x10):
             throttle = 0
 
