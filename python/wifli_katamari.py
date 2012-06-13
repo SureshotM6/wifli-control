@@ -79,6 +79,7 @@ class Controller(object):
         self.pitch = 0.
         self.yaw = 0.
         self.trim = -6
+        self.battery = 100
         self.connection = TCPConnection(self.data_recieved)
         self.stop_engine()
 
@@ -147,7 +148,8 @@ class Controller(object):
         # [0xee, 0x64, 0x64, 0x32, battery(0x64 to 0), 0x00, ? (0x5-0xa), 0x00, 0xdd]
         #byte 6 = packets processed per second?
         print 'Data recieved : "%s"' % (" ".join( "%02x" % ord(c) for c in data) )
-        print 'Battery: %d%%' % ord(data[4])
+        self.battery = ord(data[4])
+        print 'Battery: %d%%' % self.battery
 
     def stop_engine(self):
         self.throttle = 0
@@ -159,6 +161,7 @@ class Controller(object):
         self.stop_engine()
         time.sleep(0.5)
         self.connection.stop()
+
 
 if __name__=="__main__":
     pygame.init()
@@ -207,6 +210,8 @@ if __name__=="__main__":
                         controller.stop()
                         run = False
                         break
+                    elif event.button == 2: #X
+                        throttle_adj = 0.2
                     elif event.button == 4: #LT
                         controller.trim += 1
                         update = True
@@ -228,6 +233,9 @@ if __name__=="__main__":
                     #timer to force updates
                     update = True
 
+            if controller.battery <= 1:
+                throttle_adj = 0.2
+
             #don't wait if there is an active throttle adjustment
             if throttle_adj:
                 controller.throttle -= (throttle_adj*clock.get_time())/1500
@@ -241,7 +249,7 @@ if __name__=="__main__":
 
             #clear/set the timer here to force an update if no events occur
             pygame.time.set_timer(pygame.USEREVENT, 0)
-            pygame.time.set_timer(pygame.USEREVENT, 2000)
+            pygame.time.set_timer(pygame.USEREVENT, 1000)
 
 
             #katamari mode: yaw is difference in sticks
