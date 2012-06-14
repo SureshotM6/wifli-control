@@ -1,3 +1,5 @@
+import fileinput
+import os
 import pygame
 import sys
 
@@ -77,21 +79,69 @@ class PadSetup:
         print "Please press the start button"
         self.button_start = self.get_button()
 
+    def cfg_exists(self):
+        return os.path.isfile("wifli.cfg")
+
+    def read_cfg(self):
+        for line in fileinput.input("wifli.cfg"):
+            tokens = line.split(": ")
+            if len(tokens)==2:
+                key = tokens[0]
+                val = int(tokens[1])
+                if key == "lstick_haxis":
+                    self.lstick_haxis = val
+                elif key == "lstick_vaxis":
+                    self.lstick_vaxis = val
+                elif key == "rstick_haxis":
+                    self.rstick_haxis = val
+                elif key == "rstick_vaxis":
+                    self.rstick_vaxis = val
+                elif key == "lshoulder":
+                    self.lshoulder = val
+                elif key == "rshoulder":
+                    self.rshoulder = val
+                elif key == "a":
+                    self.button_a = val
+                elif key == "b":
+                    self.button_b = val
+                elif key == "x":
+                    self.button_x = val
+                elif key == "y":
+                    self.button_y = val
+                elif key == "back":
+                    self.button_back = val
+                elif key == "start":
+                    self.button_start = val
+
     def write_cfg(self):
         f = open("wifli.cfg", "w")
         f.write("lstick_haxis: %d\n" % self.lstick_haxis)
         f.write("lstick_vaxis: %d\n" % self.lstick_vaxis)
         f.write("rstick_haxis: %d\n" % self.rstick_haxis)
-        f.write("rstick.vaxis: %d\n" % self.rstick_vaxis)
+        f.write("rstick_vaxis: %d\n" % self.rstick_vaxis)
         f.write("a: %d\n" % self.button_a)
         f.write("b: %d\n" % self.button_b)
         f.write("x: %d\n" % self.button_x)
         f.write("y: %d\n" % self.button_y)
         f.write("lshoulder: %d\n" % self.lshoulder)
-        f.write("yshoulder: %d\n" % self.rshoulder)
+        f.write("rshoulder: %d\n" % self.rshoulder)
         f.write("back: %d\n" % self.button_back)
         f.write("start: %d\n" % self.button_start)
         f.close()
+
+    def print_cfg(self):
+        print("lstick_haxis: %d" % self.lstick_haxis)
+        print("lstick_vaxis: %d" % self.lstick_vaxis)
+        print("rstick_haxis: %d" % self.rstick_haxis)
+        print("rstick_vaxis: %d" % self.rstick_vaxis)
+        print("a: %d" % self.button_a)
+        print("b: %d" % self.button_b)
+        print("x: %d" % self.button_x)
+        print("y: %d" % self.button_y)
+        print("lshoulder: %d" % self.lshoulder)
+        print("rshoulder: %d" % self.rshoulder)
+        print("back: %d" % self.button_back)
+        print("start: %d" % self.button_start)
 
 if __name__=="__main__":
     pygame.init()
@@ -107,7 +157,11 @@ if __name__=="__main__":
     padSetup = PadSetup()
 
     try:
-        padSetup.setup()
-        padSetup.write_cfg()
+        if 0: #padSetup.cfg_exists():
+            padSetup.read_cfg()
+            padSetup.print_cfg()
+        else:
+            padSetup.setup()
+            padSetup.write_cfg()
     finally:
         pygame.quit()
