@@ -147,6 +147,7 @@ class Controller(object):
     def data_recieved(self, data):
         # [0xee, 0x64, 0x64, 0x32, battery(0x64 to 0), 0x00, ? (0x5-0xa), 0x00, 0xdd]
         #byte 6 = packets processed per second?
+        #one Rx packet every 2 seconds
         print 'Data recieved : "%s"' % (" ".join( "%02x" % ord(c) for c in data) )
         self.battery = ord(data[4])
         print 'Battery: %d%%' % self.battery
@@ -182,7 +183,8 @@ if __name__=="__main__":
     pygame.event.set_allowed(pygame.QUIT)
     pygame.event.set_allowed(pygame.USEREVENT)
 
-    clock = pygame.time.Clock()
+    packetclock = pygame.time.Clock()
+    throttleclock = pygame.time.Clock()
 
     axis_y = 0.
     rstick_y = 0.
@@ -192,12 +194,9 @@ if __name__=="__main__":
 
     try:
         while run:
-            #minimum of 1 every 5 seconds
-            #ensure we send a max of 15 updates/s (that is the max i think)
-            #TODO
-            #make two clock -- one to limit packets, and another to track throttle adjustments with no limiting
-            clock.tick(15)
-
+            if not throttle_adj:
+                throttleclock.tick()
+            
             update = False
             for event in pygame.event.get():
                 #can't wait for additive throttle events
@@ -237,8 +236,11 @@ if __name__=="__main__":
                 throttle_adj = 0.2
 
             #don't wait if there is an active throttle adjustment
-            if throttle_adj:
-                controller.throttle -= (throttle_adj*clock.get_time())/1500
+            if throttle_adj and not (
+                (throttle_adj > 0. and controller.throttle == 0.) or
+                (throttle_adj < 0. and controller.throttle == 1.) ): 
+                controller.throttle -= (throttle_adj*throttleclock.get_time())/1500
+                throttleclock.tick()
                 update = True
 
             if not update:
@@ -248,6 +250,7 @@ if __name__=="__main__":
                 continue
 
             #clear/set the timer here to force an update if no events occur
+            #minimum of 1 every 5 seconds
             pygame.time.set_timer(pygame.USEREVENT, 0)
             pygame.time.set_timer(pygame.USEREVENT, 1000)
 
@@ -258,6 +261,8 @@ if __name__=="__main__":
             controller.pitch = controller.deadzone(axis_y+rstick_y)
 
             controller.update()
+            #ensure we send a max of 15 updates/s (that is the max i think)
+            packetclock.tick(15)
 
 
 
