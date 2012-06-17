@@ -78,7 +78,7 @@ class Controller(object):
         self.throttle = 0.
         self.pitch = 0.
         self.yaw = 0.
-        self.trim = -6
+        self.trim = -2
         self.battery = 100
         self.connection = TCPConnection(self.data_recieved)
         self.stop_engine()
@@ -120,8 +120,11 @@ class Controller(object):
 
         print "throttle: %.02f" % self.throttle, "pitch: %.02f" % self.pitch, "yaw: %.02f" % self.yaw, "trim: %d" % self.trim
 
-        throttle = int(round(self.throttle*0x80))
-        if (throttle < 0x10):
+        #too low of a throttle causes issues
+        #limit range to 0x10 to 0x80 (or 0)
+        if self.throttle:
+            throttle = int(round(self.throttle*0x70))+0x10
+        else:
             throttle = 0
 
         trim = self.fivebit(self.trim/31.)
